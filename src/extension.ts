@@ -140,14 +140,17 @@ async function goGraphql(term?: string): Promise<void> {
         return;
     }
     
-    // 型名のsuffixを除去（...Query/Mutation/Fragment/Subscription[Type]）
+    // 型名のsuffixを除去（TSXファイルの場合のみ）
     let base = searchTerm;
-    base = base.replace(/Query$/, '');
-    base = base.replace(/Mutation$/, '');
-    base = base.replace(/Fragment$/, '');
-    base = base.replace(/Subscription$/, '');
-    if (base === '') {
-        base = searchTerm;
+    const currentEditor = vscode.window.activeTextEditor;
+    if (currentEditor && currentEditor.document.languageId === 'typescriptreact') {
+        base = base.replace(/Query$/, '');
+        base = base.replace(/Mutation$/, '');
+        base = base.replace(/Fragment$/, '');
+        base = base.replace(/Subscription$/, '');
+        if (base === '') {
+            base = searchTerm;
+        }
     }
 
     console.log(`DEBUG: Searching for GraphQL definition: ${base} (original: ${searchTerm})`);
