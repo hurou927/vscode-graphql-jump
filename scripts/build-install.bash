@@ -1,10 +1,13 @@
 #!/bin/bash
 set -eux 
 
-rm -rf graphql-jump-1.0.0.vsix
+CURRENT_VERSION=$(node -p "require('./package.json').version")
+echo "Current version: $CURRENT_VERSION"
+
+rm -rf graphql-jump-*.vsix
 
 npm run compile
 
 npx vsce package
 
-cursor --install-extension graphql-jump-1.0.0.vsix
+cursor --install-extension "graphql-jump-${CURRENT_VERSION}.vsix"

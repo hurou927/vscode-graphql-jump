@@ -19,7 +19,7 @@ async function rgGraphql(pattern: string): Promise<string[]> {
     const cmd = `rg --line-number --column --no-heading --color=never --type-add 'graphql:*.{graphql,gql}' --ignore-case --type graphql '${pattern}' --glob '!*persisted*' "${workspaceFolder.uri.fsPath}"`;
     
     console.log(`DEBUG: Running command: ${cmd}  at ${workspaceFolder.uri.fsPath}`);
-    vscode.window.showInformationMessage(`Searching: ${pattern} attt ${workspaceFolder.uri.fsPath}`);
+    vscode.window.showInformationMessage(`Searching: ${pattern} at ${workspaceFolder.uri.fsPath}`);
 
     try {
         const { stdout, stderr } = await execAsync(cmd, { 
@@ -143,7 +143,8 @@ async function goGraphql(term?: string): Promise<void> {
     // 型名のsuffixを除去（TSXファイルの場合のみ）
     let base = searchTerm;
     const currentEditor = vscode.window.activeTextEditor;
-    if (currentEditor && currentEditor.document.languageId === 'typescriptreact') {
+    const langList = ['typescriptreact', 'typescript', 'javascriptreact', 'javascript'];
+    if (currentEditor && langList.includes(currentEditor.document.languageId)) {
         base = base.replace(/Query$/, '');
         base = base.replace(/Mutation$/, '');
         base = base.replace(/Fragment$/, '');
