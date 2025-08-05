@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/hurou927/vscode-graphql-jump"
   },
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Jump to GraphQL type definitions from TypeScript files",
   "author": "",
   "type": "commonjs",
