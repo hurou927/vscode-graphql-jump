@@ -60,7 +60,9 @@ git push origin "v$NEW_VERSION"
 echo "Created tag: v$NEW_VERSION"
 
 echo "Version bumped successfully!"
-echo "To trigger a release, push the tag:"
-echo "  git push origin v$NEW_VERSION"
-echo "Or push all tags:"
-echo "  git push origin --tags"
+# echo "To trigger a release, push the tag:"
+# echo "  git push origin v$NEW_VERSION"
+# echo "Or push all tags:"
+# echo "  git push origin --tags"
+
+git tag -1
