@@ -51,7 +51,7 @@ echo "New version: $NEW_VERSION"
 npm version $NEW_VERSION --no-git-tag-version
 
 # Commit the version change
-git add package.json
+git add package.json package-lock.json
 git commit -m "Bump version to $NEW_VERSION"
 
 # Create and push tag
