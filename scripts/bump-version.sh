@@ -56,6 +56,7 @@ git commit -m "Bump version to $NEW_VERSION"
 
 # Create and push tag
 git tag "v$NEW_VERSION"
+git push origin "v$NEW_VERSION"
 echo "Created tag: v$NEW_VERSION"
 
 echo "Version bumped successfully!"
