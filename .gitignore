@@ -7,7 +7,6 @@ node_modules/
 
 # Package files
 *.vsix
-package-lock.json
 
 # Temporary files
 tmp/

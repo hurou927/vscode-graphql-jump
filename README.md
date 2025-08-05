@@ -30,9 +30,6 @@ A VS Code extension that allows you to jump to GraphQL type definitions from Typ
 - VS Code version 1.99.3 or higher
 - GraphQL schema files in your workspace
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
