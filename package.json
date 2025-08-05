@@ -1,0 +1,50 @@
+{
+  "name": "graphql-jump",
+  "version": "1.0.0",
+  "description": "Jump to GraphQL type definitions from TypeScript files",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "./out/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^16.18.126",
+    "@types/vscode": "^1.99.3",
+    "typescript": "^4.9.5"
+  },
+  "engines": {
+    "vscode": "^1.99.3"
+  },
+  "displayName": "GraphQL Jump",
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:graphql-jump.goGraphql",
+    "onCommand:graphql-jump.goGraphqlCurrentWord"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "graphql-jump.goGraphql",
+        "title": "Go to GraphQL Definition"
+      },
+      {
+        "command": "graphql-jump.goGraphqlCurrentWord",
+        "title": "Go to GraphQL Definition (Current Word)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "graphql-jump.goGraphqlCurrentWord",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g",
+        "when": "editorTextFocus"
+      }
+    ]
+  }
+}
