@@ -111,6 +111,134 @@ async function openLocation(file: string, line: number, col: number): Promise<vo
     }
 }
 
+// ファイルを別のpaneで開いて指定位置にジャンプする関数
+async function openLocationInPane(file: string, line: number, col: number): Promise<void> {
+    try {
+        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+        if (!workspaceFolder) {
+            vscode.window.showErrorMessage('No workspace folder found');
+            return;
+        }
+        
+        // 相対パスを絶対パスに変換
+        const absolutePath = path.isAbsolute(file) 
+            ? file 
+            : path.join(workspaceFolder.uri.fsPath, file);
+        
+        console.log(`DEBUG: Opening file in pane ${absolutePath} at line ${line}, col ${col}`);
+        
+        // ファイルを開く
+        const document = await vscode.workspace.openTextDocument(absolutePath);
+        
+        // 別のpaneがあるかチェック
+        const tabGroups = vscode.window.tabGroups;
+        let targetGroup;
+        
+        if (tabGroups.all.length > 1) {
+            // 既に複数のpaneがある場合、現在のpane以外の最初のpaneを使用
+            const activeGroup = tabGroups.activeTabGroup;
+            targetGroup = tabGroups.all.find(group => group !== activeGroup) || activeGroup;
+        } else {
+            // paneが1つしかない場合、新しいpaneを作成
+            await vscode.commands.executeCommand('workbench.action.splitEditor');
+            targetGroup = tabGroups.all[1] || tabGroups.all[0];
+        }
+        
+        // 指定されたpaneでファイルを開く
+        const editor = await vscode.window.showTextDocument(document, {
+            viewColumn: targetGroup.viewColumn,
+            preserveFocus: false
+        });
+        
+        // カーソル位置を設定（VSCodeは0ベースのインデックス）
+        const position = new vscode.Position(line - 1, Math.max(0, col - 1));
+        editor.selection = new vscode.Selection(position, position);
+        
+        // 該当行を画面中央に表示
+        editor.revealRange(
+            new vscode.Range(position, position), 
+            vscode.TextEditorRevealType.InCenter
+        );
+        
+        console.log(`DEBUG: Successfully opened ${file} in pane at line ${line}, col ${col}`);
+        vscode.window.showInformationMessage(`Jumped to ${path.basename(file)}:${line}:${col} in pane`);
+        
+    } catch (error: any) {
+        console.error(`Failed to open location in pane: ${error.message}`);
+        vscode.window.showErrorMessage(`Failed to open file in pane: ${error.message}`);
+    }
+}
+
+// GraphQL定義にpaneでジャンプするメイン関数
+async function goGraphqlInPane(term?: string): Promise<void> {
+    let searchTerm = term;
+    
+    // 引数が指定されていない場合は、カーソル下の単語を取得
+    if (!searchTerm) {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage('No active editor');
+            return;
+        }
+        
+        const document = editor.document;
+        const position = editor.selection.active;
+        const wordRange = document.getWordRangeAtPosition(position);
+        
+        if (!wordRange) {
+            vscode.window.showErrorMessage('No word at cursor position');
+            return;
+        }
+        
+        searchTerm = document.getText(wordRange);
+    }
+    
+    if (!searchTerm) {
+        vscode.window.showErrorMessage('No search term provided');
+        return;
+    }
+    
+    // 型名のsuffixを除去（TSXファイルの場合のみ）
+    let base = searchTerm;
+    const currentEditor = vscode.window.activeTextEditor;
+    const langList = ['typescriptreact', 'typescript', 'javascriptreact', 'javascript'];
+    if (currentEditor && langList.includes(currentEditor.document.languageId)) {
+        base = base.replace(/Query$/, '');
+        base = base.replace(/Mutation$/, '');
+        base = base.replace(/Fragment$/, '');
+        base = base.replace(/Subscription$/, '');
+        if (base === '') {
+            base = searchTerm;
+        }
+    }
+
+    console.log(`DEBUG: Searching for GraphQL definition in pane: ${base} (original: ${searchTerm})`);
+
+    // 1) query/mutation/subscription/fragment/enum <base> を優先
+    const opPattern = `\\b(query|mutation|subscription|fragment|enum)\\s+${base}\\b`;
+    let hits = await rgGraphql(opPattern);
+
+    // 2) なければbaseの単語境界で再検索
+    if (hits.length === 0) {
+        console.log(`DEBUG: No operation matches, searching for word boundary: ${base}`);
+        hits = await rgGraphql(`\\b${base}\\b`);
+    }
+
+    if (hits.length === 0) {
+        vscode.window.showWarningMessage(`No matches: ${base} (.graphql only, excluding *persisted*)`);
+        return;
+    }
+
+    console.log(`hits[0]: ${hits[0]}`);
+    const result = parseFirstHit(hits);
+    
+    if (result) {
+        await openLocationInPane(result.file, result.line, result.col);
+    } else {
+        vscode.window.showErrorMessage('Failed to parse ripgrep output');
+    }
+}
+
 // GraphQL定義にジャンプするメイン関数
 async function goGraphql(term?: string): Promise<void> {
     let searchTerm = term;
@@ -198,6 +326,20 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     context.subscriptions.push(disposableCurrentWord);
+
+    // paneで開くコマンドを登録
+    const disposableInPane = vscode.commands.registerCommand('graphql-jump.goGraphqlInPane', async (term?: string) => {
+        await goGraphqlInPane(term);
+    });
+
+    context.subscriptions.push(disposableInPane);
+
+    // paneで開くキーバインドのためのコマンドも登録（カーソル下の単語用）
+    const disposableCurrentWordInPane = vscode.commands.registerCommand('graphql-jump.goGraphqlCurrentWordInPane', async () => {
+        await goGraphqlInPane();
+    });
+
+    context.subscriptions.push(disposableCurrentWordInPane);
 }
 
 export function deactivate() {

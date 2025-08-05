@@ -31,7 +31,9 @@
   ],
   "activationEvents": [
     "onCommand:graphql-jump.goGraphql",
-    "onCommand:graphql-jump.goGraphqlCurrentWord"
+    "onCommand:graphql-jump.goGraphqlCurrentWord",
+    "onCommand:graphql-jump.goGraphqlInPane",
+    "onCommand:graphql-jump.goGraphqlCurrentWordInPane"
   ],
   "contributes": {
     "commands": [
@@ -42,6 +44,14 @@
       {
         "command": "graphql-jump.goGraphqlCurrentWord",
         "title": "Go to GraphQL Definition (Current Word)"
+      },
+      {
+        "command": "graphql-jump.goGraphqlInPane",
+        "title": "Go to GraphQL Definition in Pane"
+      },
+      {
+        "command": "graphql-jump.goGraphqlCurrentWordInPane",
+        "title": "Go to GraphQL Definition in Pane (Current Word)"
       }
     ],
     "keybindings": [
@@ -49,6 +59,12 @@
         "command": "graphql-jump.goGraphqlCurrentWord",
         "key": "ctrl+shift+g",
         "mac": "cmd+shift+g",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "graphql-jump.goGraphqlCurrentWordInPane",
+        "key": "ctrl+alt+shift+g",
+        "mac": "cmd+option+shift+g",
         "when": "editorTextFocus"
       }
     ]
