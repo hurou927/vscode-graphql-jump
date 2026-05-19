@@ -41,10 +41,10 @@ npm link
   },
   "languages": {
     "TypeScript": {
-      "language_servers": ["typescript-language-server", "graphql-jump"]
+      "language_servers": ["graphql-jump", "..."]
     },
     "TSX": {
-      "language_servers": ["typescript-language-server", "graphql-jump"]
+      "language_servers": ["graphql-jump", "..."]
     }
   }
 }
