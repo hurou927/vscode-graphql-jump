@@ -1,0 +1,25 @@
+type Product {
+  id: ID!
+  title: String!
+  status: ProductStatus!
+}
+
+mutation CreateProduct($input: CreateProductInput!) {
+  createProduct(input: $input) {
+    id
+    title
+  }
+}
+
+subscription OnProductUpdated($id: ID!) {
+  productUpdated(id: $id) {
+    id
+    title
+  }
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}

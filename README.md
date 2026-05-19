@@ -1,36 +1,72 @@
 # GraphQL Jump
 
-A VS Code extension that allows you to jump to GraphQL type definitions from TypeScript files.
+Jump to GraphQL type definitions from TypeScript/JavaScript files.
 
-## Features
+Implemented as an LSP server — works with VS Code, Zed, Neovim, and any LSP-compatible editor.
 
-- **Go to GraphQL Definition**: Navigate from TypeScript code to corresponding GraphQL type definitions
-- **Current Word Navigation**: Jump to GraphQL definitions for the word under the cursor
-- **Keyboard Shortcut**: Use `Cmd+Shift+G` (Mac) or `Ctrl+Shift+G` (Windows/Linux) for quick navigation
+## How it works
 
-## Usage
+1. Place cursor on a GraphQL type/operation name in a TS/JS file
+2. Trigger "Go to Definition" in your editor
+3. Jumps to the definition in the corresponding `.graphql` / `.gql` file
 
-### Commands
+Suffixes are automatically stripped: `GetUserQuery` → searches for `GetUser`.
 
-- `Go to GraphQL Definition`: Opens a prompt to enter a GraphQL type name and navigates to its definition
-- `Go to GraphQL Definition (Current Word)`: Automatically navigates to the GraphQL definition for the word under the cursor
+## VS Code
 
-### Keyboard Shortcuts
+Install from the Marketplace or via `.vsix`. Uses F12 / `cmd+click` / right-click → Go to Definition.
 
-- **Mac**: `Cmd+Shift+G`
-- **Windows/Linux**: `Ctrl+Shift+G`
+## Zed
 
-## Installation
+Add to `~/.config/zed/settings.json`:
 
-1. Install from the VS Code Extension Marketplace
-2. Or install manually by downloading the `.vsix` file
+```json
+{
+  "lsp": {
+    "graphql-jump": {
+      "binary": {
+        "path": "node",
+        "arguments": ["/path/to/graphql-jump-extension/out/server.js"]
+      }
+    }
+  },
+  "languages": {
+    "TypeScript": {
+      "language_servers": ["typescript-language-server", "graphql-jump"]
+    },
+    "TSX": {
+      "language_servers": ["typescript-language-server", "graphql-jump"]
+    }
+  }
+}
+```
+
+Use `gd` (Vim mode) or `F12` to jump.
+
+## Neovim
+
+Add to your config (requires `nvim-lspconfig`):
+
+```lua
+local lspconfig = require('lspconfig')
+local configs = require('lspconfig.configs')
+
+if not configs.graphql_jump then
+  configs.graphql_jump = {
+    default_config = {
+      cmd = { 'node', '/path/to/graphql-jump-extension/out/server.js', '--stdio' },
+      filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
+      root_dir = lspconfig.util.root_pattern('package.json', '.git'),
+    },
+  }
+end
+
+lspconfig.graphql_jump.setup({})
+```
+
+Use `gd` to jump.
 
 ## Requirements
 
-- VS Code version 1.99.3 or higher
-- GraphQL schema files in your workspace
-
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+- Node.js 18+
+- `.graphql` or `.gql` files in the workspace
