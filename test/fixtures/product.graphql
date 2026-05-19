@@ -4,6 +4,11 @@ type Product {
   status: ProductStatus!
 }
 
+input CreateProductInput {
+  title: String!
+  status: ProductStatus!
+}
+
 mutation CreateProduct($input: CreateProductInput!) {
   createProduct(input: $input) {
     id

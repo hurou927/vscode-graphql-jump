@@ -44,19 +44,16 @@ export function searchInFile(filePath: string, pattern: RegExp): SearchResult | 
   return null;
 }
 
+const GRAPHQL_KEYWORDS =
+  "query|mutation|subscription|fragment|type|input|interface|enum|scalar|union";
+
 export function findDefinition(base: string, files: string[]): SearchResult | null {
   const escaped = base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const opPattern = new RegExp(
-    `\\b(query|mutation|subscription|fragment|enum)\\s+${escaped}\\b`,
-    "i",
-  );
-  const fallbackPattern = new RegExp(`\\b${escaped}\\b`, "i");
+  const pattern = new RegExp(`\\b(${GRAPHQL_KEYWORDS})\\s+${escaped}\\b`, "i");
 
-  for (const pattern of [opPattern, fallbackPattern]) {
-    for (const filePath of files) {
-      const hit = searchInFile(filePath, pattern);
-      if (hit) return hit;
-    }
+  for (const filePath of files) {
+    const hit = searchInFile(filePath, pattern);
+    if (hit) return hit;
   }
   return null;
 }

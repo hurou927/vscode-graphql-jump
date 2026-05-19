@@ -126,10 +126,16 @@ describe("findDefinition", () => {
     assert.ok(result!.file.endsWith("product.graphql"));
   });
 
-  it("falls back to word boundary when no op keyword match (type)", () => {
-    // "User" has no query/mutation prefix but appears as a type
+  it("finds type by name", () => {
     const result = findDefinition("User", files);
     assert.ok(result !== null);
+    assert.ok(result!.file.endsWith("user.graphql"));
+  });
+
+  it("finds input type by name", () => {
+    const result = findDefinition("CreateProductInput", files);
+    assert.ok(result !== null);
+    assert.ok(result!.file.endsWith("product.graphql"));
   });
 
   it("returns null for unknown name", () => {
