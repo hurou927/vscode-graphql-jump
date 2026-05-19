@@ -9,6 +9,9 @@
   "author": "",
   "type": "commonjs",
   "main": "./out/client.js",
+  "bin": {
+    "graphql-jump-lsp": "./bin/graphql-jump-lsp.js"
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",

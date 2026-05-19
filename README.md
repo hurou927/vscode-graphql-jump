@@ -16,17 +16,26 @@ Suffixes are automatically stripped: `GetUserQuery` → searches for `GetUser`.
 
 Install from the Marketplace or via `.vsix`. Uses F12 / `cmd+click` / right-click → Go to Definition.
 
-## Zed
+## Zed / Neovim のセットアップ
 
-Add to `~/.config/zed/settings.json`:
+まずグローバルコマンドとして登録する：
+
+```bash
+cd /path/to/graphql-jump-extension
+npm run compile
+npm link
+```
+
+### Zed
+
+`~/.config/zed/settings.json` に追加：
 
 ```json
 {
   "lsp": {
     "graphql-jump": {
       "binary": {
-        "path": "node",
-        "arguments": ["/path/to/graphql-jump-extension/out/server.js"]
+        "path": "graphql-jump-lsp"
       }
     }
   },
@@ -41,11 +50,11 @@ Add to `~/.config/zed/settings.json`:
 }
 ```
 
-Use `gd` (Vim mode) or `F12` to jump.
+`gd` (Vim mode) または `F12` でジャンプ。
 
-## Neovim
+### Neovim
 
-Add to your config (requires `nvim-lspconfig`):
+`nvim-lspconfig` を使う場合：
 
 ```lua
 local lspconfig = require('lspconfig')
@@ -54,7 +63,7 @@ local configs = require('lspconfig.configs')
 if not configs.graphql_jump then
   configs.graphql_jump = {
     default_config = {
-      cmd = { 'node', '/path/to/graphql-jump-extension/out/server.js', '--stdio' },
+      cmd = { 'graphql-jump-lsp' },
       filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
       root_dir = lspconfig.util.root_pattern('package.json', '.git'),
     },
@@ -64,7 +73,7 @@ end
 lspconfig.graphql_jump.setup({})
 ```
 
-Use `gd` to jump.
+`gd` でジャンプ。
 
 ## Requirements
 
