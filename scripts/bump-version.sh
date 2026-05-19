@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 # Check if bump type is provided
 if [ -z "$1" ]; then
@@ -65,4 +66,3 @@ echo "Version bumped successfully!"
 # echo "Or push all tags:"
 # echo "  git push origin --tags"
 
-git tag -1
