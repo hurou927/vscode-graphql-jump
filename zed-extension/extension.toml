@@ -1,0 +1,11 @@
+id = "graphql-jump"
+name = "GraphQL Jump"
+version = "0.1.0"
+schema_version = 1
+authors = ["shunji.funasaka"]
+description = "Jump to GraphQL definitions from TypeScript/JavaScript files"
+repository = "https://github.com/hurou927/vscode-graphql-jump"
+
+[language_servers.graphql-jump]
+name = "GraphQL Jump"
+languages = ["TypeScript", "TSX", "JavaScript", "JSX"]

@@ -2,23 +2,24 @@
 
 Jump to GraphQL type definitions from TypeScript/JavaScript files.
 
-Implemented as an LSP server — works with VS Code, Zed, Neovim, and any LSP-compatible editor.
+LSP server として動作し、VS Code・Zed・Neovim に対応。
 
-## How it works
+## 動作
 
-1. Place cursor on a GraphQL type/operation name in a TS/JS file
-2. Trigger "Go to Definition" in your editor
-3. Jumps to the definition in the corresponding `.graphql` / `.gql` file
+1. TS/JS ファイルで GraphQL の型・オペレーション名にカーソルを置く
+2. エディタの "Go to Definition" を実行
+3. 対応する `.graphql` / `.gql` ファイルの定義にジャンプ
 
-Suffixes are automatically stripped: `GetUserQuery` → searches for `GetUser`.
+suffix は自動除去: `GetUserQuery` → `GetUser` として検索。
 
 ## VS Code
 
-Install from the Marketplace or via `.vsix`. Uses F12 / `cmd+click` / right-click → Go to Definition.
+Marketplace またはローカルの `.vsix` からインストール。  
+F12 / `cmd+click` / 右クリック → Go to Definition で動作。
 
-## Zed / Neovim のセットアップ
+## Zed
 
-まずグローバルコマンドとして登録する：
+### 1. LSP サーバーをグローバルコマンドとして登録
 
 ```bash
 cd /path/to/graphql-jump-extension
@@ -26,19 +27,14 @@ npm run compile
 npm link
 ```
 
-### Zed
+### 2. Dev Extension としてインストール
 
-`~/.config/zed/settings.json` に追加：
+`Cmd+Shift+P` → `zed: install dev extension` → `zed-extension/` ディレクトリを選択。
+
+### 3. settings.json に追加
 
 ```json
 {
-  "lsp": {
-    "graphql-jump": {
-      "binary": {
-        "path": "graphql-jump-lsp"
-      }
-    }
-  },
   "languages": {
     "TypeScript": {
       "language_servers": ["graphql-jump", "..."]
@@ -52,9 +48,13 @@ npm link
 
 `gd` (Vim mode) または `F12` でジャンプ。
 
-### Neovim
+## Neovim
 
 `nvim-lspconfig` を使う場合：
+
+```bash
+npm run compile && npm link
+```
 
 ```lua
 local lspconfig = require('lspconfig')
@@ -78,4 +78,4 @@ lspconfig.graphql_jump.setup({})
 ## Requirements
 
 - Node.js 18+
-- `.graphql` or `.gql` files in the workspace
+- `.graphql` または `.gql` ファイルがワークスペース内に存在すること

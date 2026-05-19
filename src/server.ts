@@ -12,7 +12,16 @@ import {
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { fileURLToPath, pathToFileURL } from "url";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 import { collectGraphqlFiles, findDefinition, getWordAt, stripSuffixes } from "./search";
+
+const LOG_FILE = path.join(os.homedir(), ".graphql-jump.log");
+const log = (msg: string) => {
+  const line = `${new Date().toISOString()} ${msg}\n`;
+  fs.appendFileSync(LOG_FILE, line);
+};
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
@@ -28,6 +37,8 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
     workspaceRoot = params.rootPath;
   }
 
+  log(`initialized. workspaceRoot: ${workspaceRoot}`);
+
   return {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
@@ -39,18 +50,38 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
 const TS_LANGS = new Set(["typescript", "typescriptreact", "javascript", "javascriptreact"]);
 
 connection.onDefinition((params: DefinitionParams): Location | null => {
-  if (!workspaceRoot) return null;
+  log(`onDefinition: ${params.textDocument.uri}`);
+
+  if (!workspaceRoot) {
+    log("no workspaceRoot");
+    return null;
+  }
 
   const doc = documents.get(params.textDocument.uri);
-  if (!doc) return null;
+  if (!doc) {
+    log("document not found in sync");
+    return null;
+  }
 
   const word = getWordAt(doc.getText(), params.position.line, params.position.character);
-  if (!word) return null;
+  if (!word) {
+    log("no word at cursor");
+    return null;
+  }
 
   const base = TS_LANGS.has(doc.languageId) ? stripSuffixes(word) : word;
+  log(`searching: "${base}" (original: "${word}")`);
+
   const files = collectGraphqlFiles(workspaceRoot);
+  log(`found ${files.length} graphql files`);
+
   const result = findDefinition(base, files);
-  if (!result) return null;
+  if (!result) {
+    log(`no match for "${base}"`);
+    return null;
+  }
+
+  log(`found: ${result.file}:${result.line}`);
 
   return Location.create(
     pathToFileURL(result.file).toString(),

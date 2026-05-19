@@ -21,6 +21,8 @@
     "lint:fix": "oxlint src --fix",
     "fmt": "oxfmt src",
     "fmt:check": "oxfmt --check src",
+    "build:zed": "cargo build --release --target wasm32-wasip1 --manifest-path zed-extension/Cargo.toml",
+    "setup:zed": "./scripts/setup-zed.sh",
     "bump:patch": "./scripts/bump-version.sh patch",
     "bump:minor": "./scripts/bump-version.sh minor",
     "bump:major": "./scripts/bump-version.sh major"
