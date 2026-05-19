@@ -1,0 +1,17 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+}
+
+query GetUser($id: ID!) {
+  user(id: $id) {
+    id
+    name
+  }
+}
+
+fragment UserBasic on User {
+  id
+  name
+}
