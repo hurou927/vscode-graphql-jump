@@ -21,6 +21,9 @@
     "lint:fix": "oxlint src --fix",
     "fmt": "oxfmt src",
     "fmt:check": "oxfmt --check src",
+    "bundle:zed": "esbuild src/server.ts --bundle --platform=node --target=node18 --outfile=zed-extension/server.bundle.js",
+    "build:zed": "npm run bundle:zed && cargo build --release --target wasm32-wasip1 --manifest-path zed-extension/Cargo.toml",
+    "setup:zed": "./scripts/setup-zed.sh",
     "bump:patch": "./scripts/bump-version.sh patch",
     "bump:minor": "./scripts/bump-version.sh minor",
     "bump:major": "./scripts/bump-version.sh major"
@@ -33,6 +36,7 @@
   "devDependencies": {
     "@types/node": "^16.18.126",
     "@types/vscode": "^1.99.3",
+    "esbuild": "^0.28.0",
     "oxfmt": "^0.51.0",
     "oxlint": "^1.66.0",
     "typescript": "^4.9.5"
