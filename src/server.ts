@@ -14,17 +14,9 @@ import {
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { fileURLToPath, pathToFileURL } from "url";
-import * as fs from "fs";
-import * as os from "os";
-import * as path from "path";
 import { collectGraphqlFiles, findDefinition, getWordAt, stripSuffixes } from "./search";
 
-const LOG_FILE = path.join(os.homedir(), ".graphql-jump.log");
-const log = (msg: string) => {
-  const line = `${new Date().toISOString()} ${msg}`;
-  process.stderr.write(line + "\n");
-  fs.appendFileSync(LOG_FILE, line + "\n");
-};
+const log = (msg: string) => connection.console.log(msg);
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
