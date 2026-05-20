@@ -9,6 +9,8 @@ import {
   Location,
   Range,
   Position,
+  DidChangeWatchedFilesNotification,
+  WatchKind,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { fileURLToPath, pathToFileURL } from "url";
@@ -19,14 +21,16 @@ import { collectGraphqlFiles, findDefinition, getWordAt, stripSuffixes } from ".
 
 const LOG_FILE = path.join(os.homedir(), ".graphql-jump.log");
 const log = (msg: string) => {
-  const line = `${new Date().toISOString()} ${msg}\n`;
-  fs.appendFileSync(LOG_FILE, line);
+  const line = `${new Date().toISOString()} ${msg}`;
+  process.stderr.write(line + "\n");
+  fs.appendFileSync(LOG_FILE, line + "\n");
 };
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
 
 let workspaceRoot: string | null = null;
+let cachedFiles: string[] | null = null;
 
 connection.onInitialize((params: InitializeParams): InitializeResult => {
   if (params.workspaceFolders?.length) {
@@ -43,11 +47,34 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       definitionProvider: true,
+      workspace: {
+        fileOperations: {},
+      },
     },
   };
 });
 
-const TS_LANGS = new Set(["typescript", "typescriptreact", "javascript", "javascriptreact"]);
+connection.onInitialized(() => {
+  connection.client.register(DidChangeWatchedFilesNotification.type, {
+    watchers: [{ globPattern: "**/*.{graphql,gql}", kind: WatchKind.Create | WatchKind.Delete }],
+  });
+});
+
+connection.onDidChangeWatchedFiles(() => {
+  log("graphql files changed, invalidating cache");
+  cachedFiles = null;
+});
+
+// VS Code: "typescript", "typescriptreact", "javascript", "javascriptreact"
+// Zed:     "typescript", "tsx", "javascript", "jsx"
+const TS_LANGS = new Set([
+  "typescript",
+  "typescriptreact",
+  "tsx",
+  "javascript",
+  "javascriptreact",
+  "jsx",
+]);
 
 connection.onDefinition((params: DefinitionParams): Location | null => {
   log(`onDefinition: ${params.textDocument.uri}`);
@@ -70,12 +97,14 @@ connection.onDefinition((params: DefinitionParams): Location | null => {
   }
 
   const base = TS_LANGS.has(doc.languageId) ? stripSuffixes(word) : word;
-  log(`searching: "${base}" (original: "${word}")`);
+  log(`searching: "${base}" (original: "${word}", languageId: "${doc.languageId}")`);
 
-  const files = collectGraphqlFiles(workspaceRoot);
-  log(`found ${files.length} graphql files`);
+  if (!cachedFiles) {
+    cachedFiles = collectGraphqlFiles(workspaceRoot);
+    log(`scanned ${cachedFiles.length} graphql files`);
+  }
 
-  const result = findDefinition(base, files);
+  const result = findDefinition(base, cachedFiles);
   if (!result) {
     log(`no match for "${base}"`);
     return null;

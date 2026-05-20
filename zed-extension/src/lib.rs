@@ -10,15 +10,17 @@ impl zed::Extension for GraphqlJumpExtension {
     fn language_server_command(
         &mut self,
         _language_server_id: &LanguageServerId,
-        worktree: &zed::Worktree,
+        _worktree: &zed::Worktree,
     ) -> Result<zed::Command> {
-        let command = worktree
-            .which("graphql-jump-lsp")
-            .ok_or("graphql-jump-lsp not found in PATH. Run `npm link` in the graphql-jump-extension repo.")?;
+        // CWD は work/graphql-jump/ だが実体は installed/graphql-jump/
+        let extension_dir = std::env::current_dir()
+            .map(|p| p.to_string_lossy().replace("/work/", "/installed/"))
+            .unwrap_or_default();
+        let server_path = format!("{}/server.bundle.js", extension_dir);
 
         Ok(zed::Command {
-            command,
-            args: vec![],
+            command: zed::node_binary_path()?,
+            args: vec![server_path, "--stdio".to_string()],
             env: vec![],
         })
     }

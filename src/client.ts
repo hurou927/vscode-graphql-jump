@@ -13,8 +13,8 @@ export function activate(context: ExtensionContext): void {
   const serverModule = context.asAbsolutePath(path.join("out", "server.js"));
 
   const serverOptions: ServerOptions = {
-    run: { module: serverModule, transport: TransportKind.ipc },
-    debug: { module: serverModule, transport: TransportKind.ipc },
+    run: { module: serverModule, transport: TransportKind.stdio },
+    debug: { module: serverModule, transport: TransportKind.stdio },
   };
 
   const clientOptions: LanguageClientOptions = {
